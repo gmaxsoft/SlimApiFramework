@@ -1,0 +1,316 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Modular Monolith API",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "API root"
+        }
+    ],
+    "paths": {
+        "/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Issue JWT",
+                "description": "Weryfikuje e-mail i hasło, a przy sukcesie zwraca token JWT (access token) w formacie JSON.",
+                "operationId": "cfa879138bf946fc1770d7eed179716a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bearer token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "access_token": {
+                                            "type": "string"
+                                        },
+                                        "expires_in": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/v1/health": {
+            "get": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Liveness probe",
+                "description": "Zwraca statyczny JSON potwierdzający, że proces PHP i routing działają poprawnie.",
+                "operationId": "bb6cb54b9e2d1d4c0fe49314f6b8004a",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/users": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "List users",
+                "description": "Zwraca listę użytkowników z obsługą parametrów zapytania `limit` (1–100) i `offset`.",
+                "operationId": "0d36d5fc9703b18f30825f41d3bb50db",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 50
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 0
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paged users",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/UserDto"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Register a user",
+                "description": "Tworzy nowego użytkownika z treści JSON (e-mail, nazwa, hasło); przy konflikcie e-maila zwraca 409.",
+                "operationId": "9942ee70dbdc2acb67aeb29a4b869ccc",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "name",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserDto"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Email taken"
+                    }
+                }
+            }
+        },
+        "/v1/users/{id}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user by id",
+                "description": "Zwraca jednego użytkownika po identyfikatorze z segmentu ścieżki lub odpowiedź 404 (Problem Details).",
+                "operationId": "89c904ae5895d45e31de0a9f3a1d0598",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserDto"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/v1/users/me": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Current user from JWT",
+                "description": "Zwraca profil użytkownika na podstawie roszczenia `sub` z tokenu JWT (atrybut żądania ustawiany przez middleware).",
+                "operationId": "6d9c0bfdabb187358b50b90fc37eaf0c",
+                "responses": {
+                    "200": {
+                        "description": "Profile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserDto"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing or invalid token"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "UserDto": {
+                "required": [
+                    "id",
+                    "email",
+                    "name",
+                    "created_at"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Schemat OpenAPI `UserDto` używany w dokumentacji odpowiedzi API (skanowanie atrybutów swagger-php).",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "JWT from POST /v1/auth/login",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "System",
+            "description": "System"
+        },
+        {
+            "name": "Users",
+            "description": "Users"
+        }
+    ]
+}
