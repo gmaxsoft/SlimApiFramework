@@ -14,7 +14,10 @@ use Monolog\Level;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use Tuupola\Middleware\JwtAuthentication;
+use JimTools\JwtAuth\Decoder\FirebaseDecoder;
+use JimTools\JwtAuth\Middleware\JwtAuthentication;
+use JimTools\JwtAuth\Options;
+use JimTools\JwtAuth\Secret;
 use function DI\create;
 use function DI\factory;
 use function DI\get;
@@ -50,20 +53,27 @@ return [
     /** Domyślny handler błędów Slim zwracający JSON Problem Details (RFC 7807). */
     ProblemJsonErrorHandler::class => create()->constructor(get(LoggerInterface::class)),
 
-    /** Middleware JWT (tuupola): weryfikacja tokenu HS256, zdekodowane roszczenia w atrybucie `jwt`. */
+    /** Middleware JWT (jimtools/jwt-auth, firebase/php-jwt ^7): roszczenia w atrybucie żądania `jwt`. */
     JwtAuthentication::class => factory(static function (ContainerInterface $c): JwtAuthentication {
         /** @var array<string, mixed> $settings */
         $settings = $c->get('settings');
         /** @var array<string, mixed> $jwt */
         $jwt = $settings['jwt'];
         $env = (string) ($settings['app']['env'] ?? 'production');
+        $isProduction = $env === 'production';
 
-        return new JwtAuthentication([
-            'secret' => (string) ($jwt['secret'] ?? ''),
-            'algorithm' => [(string) ($jwt['algorithm'] ?? 'HS256')],
-            'attribute' => 'jwt',
-            'secure' => $env === 'production',
-        ]);
+        $secret = new Secret(
+            (string) ($jwt['secret'] ?? ''),
+            (string) ($jwt['algorithm'] ?? 'HS256'),
+        );
+        $decoder = new FirebaseDecoder($secret);
+
+        $options = new Options(
+            isSecure: $isProduction,
+            attribute: 'jwt',
+        );
+
+        return new JwtAuthentication($options, $decoder);
     }),
 
     /** Ogranicza liczbę żądań na adres IP w oknie czasowym (tabela `rate_limit_hits`). */

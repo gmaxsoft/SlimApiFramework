@@ -11,7 +11,7 @@ use App\Core\Middleware\RateLimitMiddleware;
 use App\Modules\User\Controllers\UserController;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
-use Tuupola\Middleware\JwtAuthentication;
+use JimTools\JwtAuth\Middleware\JwtAuthentication;
 
 /**
  * Rejestruje endpointy REST użytkownika oraz middleware JWT dla trasy `/me` i limitowania dla całej grupy.

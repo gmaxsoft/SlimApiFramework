@@ -13,7 +13,7 @@ API HTTP w PHP oparte na Slim 4 w układzie modularnego monolitu (PHP-DI, PDO/My
 | Konfiguracja | [vlucas/phpdotenv](https://github.com/vlucas/phpdotenv) |
 | Logowanie | [Monolog](https://github.com/Seldaek/monolog) |
 | Dokumentacja API | [zircote/swagger-php](https://github.com/zircote/swagger-php), Swagger UI pod `/docs` |
-| Uwierzytelnianie | JWT ([tuupola/slim-jwt-auth](https://github.com/tuupola/slim-jwt-auth)), token generowany po `/v1/auth/login` |
+| Uwierzytelnianie | JWT ([jimtools/jwt-auth](https://github.com/JimTools/jwt-auth), `firebase/php-jwt` ^7), token generowany po `/v1/auth/login` |
 | Baza danych | MySQL przez **PDO** (bez ORM; zapytania w klasach repozytoriów) |
 | Ograniczanie ruchu | Middleware rate limit z licznikami w MySQL (`rate_limit_hits`) |
 | Standardy | PSR-4, PSR-7, PSR-11, PSR-15 |
