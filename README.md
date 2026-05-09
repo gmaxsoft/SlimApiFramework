@@ -1,4 +1,4 @@
-# SlimApiFramework
+# Slim PHP Api Framework Boilerplate
 
 API HTTP w PHP oparte na Slim 4 w układzie modularnego monolitu (PHP-DI, PDO/MySQL, JWT, OpenAPI, Monolog).
 
